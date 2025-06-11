@@ -1,5 +1,5 @@
 from typing import List, Tuple
-
+import pickle
 import os
 import struct
 import zlib
@@ -80,15 +80,33 @@ class Vdm:
         delta_blob = delta_signatures[1].sig_data
         self.raw_data = self.apply_delta_patch(delta_blob,self.raw_data)
     
-    def get_signatures(self) -> List[BaseSig]:
-        self.signatures = self.parse_database(self.raw_data)
-        return self.signatures
 
-    def get_threats(self) -> List[Threat]:
+    def parse_files(self):
         self.signatures = self.parse_database(self.raw_data)
         self.threats = self.parse_threats(self.signatures)
-        return self.threats
 
+    def get_threats(self) -> List[Threat]:
+        return self.threats
+    
+    def write_cache(self, cache, name):
+        filename = os.path.join(cache, name + ".vdm.pickle")
+        with open(filename, "wb") as f:
+            pickle.dump(self, f)
+
+    def has_cache(self, cache, name) -> bool:
+        filename = os.path.join(cache, name + ".vdm.pickle")
+        return os.path.exists(filename)
+    
+    @staticmethod
+    def make_from_cache(cache, name):
+        filename = os.path.join(cache, name + ".vdm.pickle")
+        if not os.path.exists(filename):
+            raise FileNotFoundError(f"Cache file does not exist: {filename}")
+        with open(filename, "rb") as f:
+            vdm:Vdm = pickle.load(f)
+        return vdm
+    
+    # Raw data -> self.signatures
     @staticmethod
     def parse_database(data:bytes) -> List[BaseSig]:
         counter = defaultdict(int)
@@ -116,6 +134,8 @@ class Vdm:
                 entry = HStrSig(data,ptr)
             elif sig_type in HSTR_EXT_SIGS:
                 entry = HStrExtSig(data,ptr)
+            elif sig_type == "SIGNATURE_TYPE_LUASTANDALONE":
+                entry = LuaSig(data,ptr)
             else:
                 entry = BaseSig(data,ptr)
             # check if the sig_data has valid data size

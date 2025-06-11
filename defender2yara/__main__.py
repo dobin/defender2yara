@@ -34,6 +34,9 @@ def run():
     parser.add_argument('--proxy',help="use a proxy to download signatures (e.g. http://localhost:8000)")
     parser.add_argument('--debug', action='store_true', default=False, help="print detailed logs")
     parser.add_argument('--suppress', action='store_true', default=False, help="suppress all logs")
+
+    parser.add_argument('--writecache', action='store_true', default=False, help="write VDM cache files. to be used with --cacheonly")
+    parser.add_argument('--cacheonly', action='store_true', default=False, help="Load VDM cache files")
     
     args = parser.parse_args()
     
