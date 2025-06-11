@@ -26,7 +26,7 @@ def fixup_lua_data(data: bytes) -> bytes:
     try:
         export = func.export(root=True)
     except Exception as e:
-        print("  Exception: Failed to export Lua function: {}".format(e))
+        print("  Exception when converting lua: {}".format(e))
         return None
     
     return export
@@ -120,7 +120,9 @@ class LuaFunc(object):
 
         self.funcs = []
         for i in range(nb_func):
-            self.funcs.append(LuaFunc(self.stream))
+            f = LuaFunc(self.stream)
+            f.init()
+            self.funcs.append(f)
 
         src_line_positions = self.read_int()
         if src_line_positions != 0:

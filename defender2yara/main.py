@@ -94,9 +94,12 @@ def parse_asr_entry(threat: Threat, n: int) -> int:
                 # no issue, just print a warning
                 print("  Lua header offset is not at expected position (45): {}".format(lua_header_offset))
             #print("Lua header offset: {}".format(lua_header_offset))
+
+            # fixup lua data
+            lua_fixed = fixup_lua_data(sig.sig_data[lua_header_offset:])
             
-            filename_out = os.path.join("rules", "lua_{}.lua".format(n))
-            open(filename_out, "wb").write(sig.sig_data[lua_header_offset:])
+            filename_out = os.path.join("rules", "asr_lua_{}.bin".format(n))
+            open(filename_out, "wb").write(lua_fixed)
             n += 1
     return n
 
@@ -226,6 +229,7 @@ def main(args):
         vdm_delta_path = os.path.join(cache_dir,"vdm",major_version,minor_version)
         
         for name in ["mpav","mpas"]:
+        #for name in ["mpas"]:  #####################
             base_file = os.path.join(vdm_base_path,name+"base.vdm")
             delta_file = os.path.join(vdm_delta_path,name+"dlta.vdm")
         
