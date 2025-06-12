@@ -1,0 +1,28 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/6680.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0, l_0_1 = pcall(mp.get_contextdata, mp.CONTEXT_DATA_AMSI_CONTENTNAME)
+if l_0_0 and l_0_1 ~= nil and (string.find)(l_0_1, "BodyContent;UrlPath:/EWS/Exchange.asmx;", 1, true) ~= nil then
+  local l_0_2 = (mp.get_contextdata)(mp.CONTEXT_DATA_AMSI_OPERATION_PPID)
+  if l_0_2 ~= nil then
+    if (mp.get_mpattribute)("AGGR:EWSGetFolder1") then
+      AddTacticForPid(l_0_2, "EWSGetFolder1", 60)
+    end
+    if (mp.get_mpattribute)("AGGR:EWSFindItem") then
+      AddTacticForPid(l_0_2, "EWSFindItem", 60)
+    end
+    if (mp.get_mpattribute)("AGGR:EWSGetItem1") then
+      AddTacticForPid(l_0_2, "EWSGetItem1", 60)
+    end
+    local l_0_3 = GetTacticsTableForPid(l_0_2)
+    if l_0_3 ~= nil and type(l_0_3) == "table" and l_0_3.EWSGetFolder1 and l_0_3.EWSFindItem and l_0_3.EWSGetItem1 then
+      return mp.INFECTED
+    end
+  end
+end
+do
+  return mp.CLEAN
+end
+

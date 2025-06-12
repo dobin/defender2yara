@@ -1,0 +1,36 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/1718.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0 = 32
+local l_0_1 = 3000000
+local l_0_2 = (mp.get_mpattributevalue)("RPF:MpCertStart")
+local l_0_3 = (mp.get_mpattributevalue)("RPF:MpCertSz")
+local l_0_4 = (mp.get_mpattributevalue)("RPF:MpSeqCertSz")
+local l_0_5 = 14
+if l_0_2 == nil or l_0_3 == nil or l_0_4 == nil or l_0_4 == 0 then
+  return mp.CLEAN
+end
+if l_0_3 <= l_0_4 + l_0_5 + l_0_0 then
+  return mp.CLEAN
+end
+local l_0_6 = (mp.getfilesize)()
+if l_0_6 == nil then
+  return mp.CLEAN
+end
+local l_0_7 = l_0_2 + l_0_4 + l_0_5
+if l_0_7 <= l_0_2 then
+  return mp.CLEAN
+end
+local l_0_8 = l_0_6 - l_0_7
+if l_0_8 < l_0_0 then
+  return mp.CLEAN
+end
+;
+(mp.set_mpattribute)((string.format)("Lua:CertOverlayMetadata_Addr0x%x_Size0x%x", l_0_7, l_0_8))
+if l_0_8 <= l_0_1 then
+  (mp.vfo_add_filechunk)(l_0_7, l_0_8, "[CertOverlayBuffer]", mp.ADD_VFO_TAKE_ACTION_ON_DAD)
+end
+return mp.INFECTED
+

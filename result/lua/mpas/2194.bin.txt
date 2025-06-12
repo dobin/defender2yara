@@ -1,0 +1,9 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/2194.bin 
+
+-- params : ...
+-- function num : 0
+(mp.set_mpattribute)("BM_Timestomp")
+TrackPidAndTechniqueBM("BM", "T1070.006", "DefenseEvasion_IndicatorRemoval_TimeStompTouch")
+return mp.INFECTED
+

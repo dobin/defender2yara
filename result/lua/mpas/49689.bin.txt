@@ -1,0 +1,27 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/49689.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0 = (mp.get_contextdata)(mp.CONTEXT_DATA_SCANREASON)
+if l_0_0 ~= mp.SCANREASON_ONMODIFIEDHANDLECLOSE then
+  return mp.CLEAN
+end
+local l_0_1 = (mp.getfilesize)()
+if l_0_1 == nil or l_0_1 >= 1280 then
+  return mp.CLEAN
+end
+local l_0_2 = (mp.getfilename)(mp.FILEPATH_QUERY_PATH)
+if l_0_2 == nil or l_0_2 == "" then
+  return mp.CLEAN
+end
+if l_0_2:sub(1, 9) == "/usr/sap/" and (string.find)(l_0_2, "/irj/servlet_jsp/irj/", -36, true) then
+  (mp.set_mpattribute)("BM_SapJavaWrite")
+  return mp.INFECTED
+end
+if (string.find)(l_0_2, "\\usr\\sap\\", 1, true) and (string.find)(l_0_2, "\\irj\\servlet_jsp\\irj\\", 1, true) then
+  (mp.set_mpattribute)("BM_SapJavaWrite")
+  return mp.INFECTED
+end
+return mp.CLEAN
+

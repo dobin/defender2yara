@@ -1,0 +1,10 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/38984.bin 
+
+-- params : ...
+-- function num : 0
+if epcode[1] == 131 and epcode[2] == 236 and epcode[30] == 185 and epcode[35] == 128 and epcode[36] == 48 then
+  return mp.INFECTED
+end
+return mp.CLEAN
+

@@ -1,0 +1,34 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/2872.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0 = "SapNetWeaverVulnDet"
+local l_0_1 = GetRollingQueueKeyValue(l_0_0, "ManifestFileScan")
+if l_0_1 ~= nil then
+  return mp.CLEAN
+end
+local l_0_2 = (mp.getfilename)(mp.FILEPATH_QUERY_FNAME)
+if l_0_2 == nil or l_0_2 == "" then
+  return mp.CLEAN
+end
+local l_0_3 = "MANIFEST.MF"
+if (string.find)(l_0_2, l_0_3, #l_0_3 * -1, true) then
+  local l_0_4 = tostring(headerpage)
+  if l_0_4 ~= nil then
+    local l_0_5 = "Implementation%-Version: (%d+)%.(%d+)%.(%d+)%.(%d+)"
+    local l_0_6, l_0_7, l_0_8, l_0_9 = (string.match)(l_0_4, l_0_5)
+    if l_0_6 ~= nil and l_0_7 ~= nil and l_0_8 ~= nil and l_0_9 ~= nil then
+      local l_0_10 = l_0_6 .. "." .. l_0_7 .. "." .. l_0_8 .. "." .. l_0_9
+      if l_0_6 == "7" and (string.sub)(l_0_7, 1, 1) == "5" and tonumber(l_0_8) < 20250418121702 then
+        (mp.set_mpattribute)((string.format)("MpInternal_researchdata=mf_version=%s", l_0_10))
+        AppendToRollingQueue(l_0_0, "ManifestFileScan", 1, 2592000)
+        return mp.INFECTED
+      end
+    end
+  end
+end
+do
+  return mp.CLEAN
+end
+

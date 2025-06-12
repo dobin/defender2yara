@@ -1,0 +1,11 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/3385.bin 
+
+-- params : ...
+-- function num : 0
+add_parents()
+reportSessionInformationInclusive()
+reportRelevantUntrustedEntities(0)
+reportAVExcludedEntities()
+return mp.INFECTED
+

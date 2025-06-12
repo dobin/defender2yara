@@ -1,0 +1,25 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/49666.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0 = (mp.GetParentProcInfo)()
+if not l_0_0.image_path then
+  local l_0_1 = (string.lower)(isnull(l_0_0) or "")
+  if (string.find)(l_0_1, "\\windows\\system32\\", 1, true) and (l_0_1:match("([^\\]+)$") == "fodhelper.exe" or l_0_1:match("([^\\]+)$") == "computerdefaults.exe" or l_0_1:match("([^\\]+)$") == "wsreset.exe" or l_0_1:match("([^\\]+)$") == "changepk.exe" or l_0_1:match("([^\\]+)$") == "slui.exe" or l_0_1:match("([^\\]+)$") == "control.exe") and (MpCommon.GetPersistContextCountNoPath)("UACBypassRegSet.A") > 0 then
+    local l_0_2 = (MpCommon.GetPersistContextNoPath)("UACBypassRegSet.A")
+    if l_0_2 then
+      for l_0_6,l_0_7 in ipairs(l_0_2) do
+        if (string.lower)(l_0_7) == (string.lower)(l_0_0.ppid) then
+          return mp.INFECTED
+        end
+      end
+    end
+  end
+  do
+    l_0_1 = mp
+    l_0_1 = l_0_1.CLEAN
+    return l_0_1
+  end
+end
+

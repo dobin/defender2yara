@@ -1,0 +1,22 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/48260.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0 = (mp.getfilesize)()
+do
+  if peattributes.ismsil == true and l_0_0 < 20480 then
+    local l_0_1 = (pe.get_versioninfo)()
+    -- DECOMPILER ERROR at PC46: Unhandled construct in 'MakeBoolean' P3
+
+    -- DECOMPILER ERROR at PC46: Unhandled construct in 'MakeBoolean' P3
+
+    -- DECOMPILER ERROR at PC46: Unhandled construct in 'MakeBoolean' P3
+
+    if (l_0_1.OriginalFilename ~= nil and l_0_1.OriginalFilename == "WindowsApp.exe") or l_0_1.InternalName == nil or l_0_1.CompanyName == nil or l_0_1.FileDescription == nil or l_0_1.ProductName ~= nil and l_0_1.ProductName == "WindowsApp" then
+      return mp.INFECTED
+    end
+  end
+  return mp.CLEAN
+end
+

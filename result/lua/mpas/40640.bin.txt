@@ -1,0 +1,11 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/40640.bin 
+
+-- params : ...
+-- function num : 0
+pcallEx("maceSendConfig", maceSendConfig, "mace_systembc")
+pcallEx("reportRelatedBmHits", reportRelatedBmHits)
+reportRelevantUntrustedEntities(1)
+reportTimingData()
+return mp.INFECTED
+

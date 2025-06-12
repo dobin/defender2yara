@@ -1,0 +1,26 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpav/286.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0, l_0_1 = pcall(mp.get_contextdata, mp.CONTEXT_DATA_AMSI_CONTENTNAME)
+if l_0_0 and l_0_1 ~= nil and ((string.find)(l_0_1, "SharePointServerRequest_POST/_admin/BDC/AddBDCApplication.aspx", 1, true) ~= nil or (string.find)(l_0_1, "/BusinessDataMetadataCatalog/BDCMetadata.bdcm", 1, true) ~= nil) then
+  (mp.readprotection)(false)
+  local l_0_2 = (mp.getfilesize)()
+  if l_0_2 > 1048576 then
+    return mp.CLEAN
+  end
+  local l_0_3 = (mp.readfile)(0, l_0_2)
+  ;
+  (mp.readprotection)(true)
+  if (string.find)(l_0_3, "xmlns=\"http://schemas.microsoft.com/windows/2007/BusinessDataCatalog\"", 1, true) and (string.find)(l_0_3, "</LobSystem>", 1, true) and (string.find)(l_0_3, "</LobSystems>", 1, true) and (string.find)(l_0_3, "</Model>", 1, true) then
+    local l_0_4 = "<LobSystem Name=\"[^\"]+\" Type=\"(DotNetAssembly|WebService)\">"
+    if (MpCommon.StringRegExpSearch)(l_0_4, l_0_3) then
+      return mp.INFECTED
+    end
+  end
+end
+do
+  return mp.CLEAN
+end
+

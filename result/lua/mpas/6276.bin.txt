@@ -1,0 +1,19 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/6276.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0, l_0_1 = pcall(mp.get_contextdata, mp.CONTEXT_DATA_AMSI_CONTENTNAME)
+do
+  if l_0_0 and l_0_1 ~= nil and (string.find)(l_0_1, "BodyContent;UrlPath:/EWS/Exchange.asmx;", 1, true) ~= nil then
+    local l_0_2 = (mp.get_contextdata)(mp.CONTEXT_DATA_AMSI_OPERATION_PPID)
+    if l_0_2 ~= nil then
+      AddTacticForPid(l_0_2, "EWSUpdateFolder")
+      if GetRollingQueueKeyValue("Tact-" .. l_0_2, "EWSUpdateFolder") > 2 then
+        return mp.INFECTED
+      end
+    end
+  end
+  return mp.CLEAN
+end
+

@@ -1,0 +1,10 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/46092.bin 
+
+-- params : ...
+-- function num : 0
+if (mp.get_mpattribute)("pea_no_relocs") and (mp.get_mpattribute)("pea_lastscn_executable") and (mp.get_mpattribute)("pea_lastscn_writable") and (mp.get_mpattribute)("pea_firstsectwritable") and (mp.get_mpattribute)("pea_epoutofimage") then
+  return mp.INFECTED
+end
+return mp.CLEAN
+

@@ -1,0 +1,334 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/515.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0 = function(l_1_0)
+  -- function num : 0_0
+  local l_1_1 = (string.gsub)(l_1_0, "([^%z])%z", "%1")
+  local l_1_2 = {}
+  l_1_2["%2b"] = "+"
+  l_1_2["%2B"] = "+"
+  l_1_2["%2d"] = "+"
+  l_1_2["%2D"] = "+"
+  l_1_2["-"] = "+"
+  l_1_2["%2f"] = "/"
+  l_1_2["%2F"] = "/"
+  l_1_2["%5f"] = "/"
+  l_1_2["%5F"] = "/"
+  l_1_2._ = "/"
+  l_1_2["%3d"] = "="
+  l_1_2["%3D"] = "="
+  l_1_2["&#34;"] = "\""
+  l_1_2["&gt;"] = ">"
+  l_1_2["&lt;"] = "<"
+  local l_1_3 = string.gsub
+  local l_1_4 = l_1_1
+  local l_1_5 = "([%%&#%-_][%%&#]?[235gl]?[4bBdDfFt]?;?)"
+  do
+    local l_1_6 = l_1_2
+    do return l_1_3(l_1_4, l_1_5, l_1_6) end
+    -- DECOMPILER ERROR at PC29: Confused about usage of register R4 for local variables in 'ReleaseLocals'
+
+  end
+end
+
+;
+(mp.readprotection)(false)
+local l_0_4 = function(l_2_0, l_2_1)
+  -- function num : 0_1 , upvalues : l_0_0, l_0_1
+  local l_2_2 = 10
+  local l_2_3 = 5
+  local l_2_5 = (l_2_1 or l_2_3) - 1
+  if l_2_5 >= 0 and l_2_5 < l_2_3 then
+    for l_2_9 in (l_0_0(l_2_0)):gmatch("([%w%+/]+)") do
+      local l_2_6 = {}
+      -- DECOMPILER ERROR at PC18: Confused about usage of register: R9 in 'UnsetPending'
+
+      if #R9_PC18 >= 100 then
+        if #R9_PC18 % 4 >= 1 then
+          R9_PC18 = R9_PC18 .. (string.rep)("=", 4 - #R9_PC18 % 4)
+        end
+        if l_2_2 <= #l_0_1((MpCommon.Base64Decode)(R9_PC18), l_2_5) then
+          (table.insert)(l_2_6, "ERROR_TooManyDecodedPayloads")
+        else
+          for l_2_14,l_2_15 in pairs(l_0_1((MpCommon.Base64Decode)(R9_PC18), l_2_5)) do
+            local l_2_11 = nil
+            -- DECOMPILER ERROR at PC57: Confused about usage of register: R15 in 'UnsetPending'
+
+            ;
+            (table.insert)(l_2_6, R15_PC57)
+          end
+        end
+      end
+    end
+  end
+  do
+    if l_2_6[-1] or "" ~= l_2_0 then
+      (table.insert)(l_2_6, l_2_0)
+    end
+    return l_2_6
+  end
+end
+
+local l_0_5 = function(l_3_0)
+  -- function num : 0_2 , upvalues : l_0_0
+  local l_3_1 = l_0_0(l_3_0)
+  local l_3_2 = {}
+  local l_3_3 = {}
+  l_3_3.Command1 = "FileName[\'\"]?:%s-[\'\"]?(.-)[\'\"]?,%s-[\'\"]?Arguments[\'\"]?:%s-[\'\"]?(.-)[\'\"]?%s-}"
+  l_3_3.Command2 = "MethodName.-Start.-MethodParameters.->.->(.-)</.->.->(.-)</"
+  l_3_3.Command3 = "MethodParameters[\'\"]:%s-{.-$values[\'\"]:%s-%[[\'\"](.-)[\'\"],%s-[\'\"](.-)[\'\"]%]%s-}"
+  l_3_3.Command4 = "Arguments=\"(.-)\" %u%a+=.*FileName=\"(.-)\" ?/"
+  l_3_3.Command5 = "Arguments\" value=\"(.-)\"%s-/>.-FileName\" value=\"(.-)\"%s-/>"
+  l_3_3.Command6 = "Assembly.-Items.-String%[%].->.->(.-)</.->.->(.-)</"
+  l_3_3.Command7 = "DelegateSerializationHolder..?%z%z%z..%z%z%z.%z%z%z..%z%z%z.(.-)..%z%z%z.(.-)..%z%z%z"
+  l_3_3.DLL1 = "(MZ.-I%zn%zt%ze%zr%zn%za%zl%zN%za%zm%ze%z(.-)%z%z%z.-)%z.%w-%.?UnitySerializationHolder"
+  l_3_3.DLL2 = "(MZ.-I%zn%zt%ze%zr%zn%za%zl%zN%za%zm%ze%z(.-)%z%z%z.-%z+)$"
+  for l_3_7,l_3_8 in pairs(l_3_3) do
+    local l_3_9, l_3_10, l_3_11 = (string.find)(l_3_1, l_3_8)
+    do
+      if R12_PC23 == nil then
+        local l_3_12, l_3_13 = R12_PC23, (string.find)(l_3_0, l_3_8)
+        l_3_11 = 
+        l_3_10 = 
+        l_3_9 = l_3_13
+      end
+      if l_3_12 ~= nil then
+        local l_3_14 = nil
+        local l_3_15 = ""
+        if (string.find)(l_3_7, "DLL", 1, true) ~= nil then
+          (mp.vfo_add_buffer)(l_3_11, "[EmbeddedDLL:" .. l_3_14:gsub("%c", "") .. "]", mp.ADD_VFO_TAKE_ACTION_ON_DAD)
+        else
+          -- DECOMPILER ERROR at PC103: Overwrote pending register: R13 in 'AssignReg'
+
+          -- DECOMPILER ERROR at PC108: Overwrote pending register: R13 in 'AssignReg'
+
+        end
+        if (string.find)(l_3_7, "Command[123]") == nil or (sysio.CommandLineScan)(l_3_15:gsub("%z", ""), 0) == true then
+          do
+            (table.insert)(l_3_2, "<<" .. (string.rep)("0", 5 - #tostring(l_3_9)) .. l_3_9 .. (string.rep)("0", 5 - #tostring(l_3_10)) .. l_3_10 .. ">>" .. "[" .. l_3_7:gsub("%d$", "") .. "] " .. l_3_15:gsub("%z", ""))
+            -- DECOMPILER ERROR at PC138: LeaveBlock: unexpected jumping out IF_THEN_STMT
+
+            -- DECOMPILER ERROR at PC138: LeaveBlock: unexpected jumping out IF_STMT
+
+            -- DECOMPILER ERROR at PC138: LeaveBlock: unexpected jumping out IF_THEN_STMT
+
+            -- DECOMPILER ERROR at PC138: LeaveBlock: unexpected jumping out IF_STMT
+
+            -- DECOMPILER ERROR at PC138: LeaveBlock: unexpected jumping out DO_STMT
+
+          end
+        end
+      end
+    end
+  end
+  ;
+  (table.sort)(l_3_2)
+  -- DECOMPILER ERROR at PC150: Overwrote pending register: R7 in 'AssignReg'
+
+  local l_3_16 = (l_3_2[1] or ""):gsub("<<%d->>", l_3_7)
+  local l_3_17 = {}
+  local l_3_18 = {}
+  l_3_18.BinaryFormatter = "%z\001%z%z%z"
+  l_3_18.DataContractSerializer = "<root%s-type"
+  l_3_18.DataContractSerializer2 = "datacontract.-Serialization"
+  l_3_18.FsPickler = "{.-FsPickler"
+  l_3_18.JavaScriptSerializer = "{.-__type"
+  l_3_18.JsonNet = "{.-$type"
+  l_3_18.LosFormatter = "\255\001"
+  l_3_18.NetDataContractSerializer = "<.-:Assembly%s*="
+  l_3_18.SharpSerializerXml = "<Complex.-Properties"
+  l_3_18.SoapFormatter = "<[%s\"\']-SOAP"
+  l_3_18.Xaml4 = "xml.-/xaml"
+  l_3_18.XmlSerializer2 = "xml.-XMLSchema"
+  l_3_18.YamlDotNet = "!<!"
+  for l_3_22,l_3_23 in pairs(l_3_18) do
+    -- DECOMPILER ERROR at PC173: Overwrote pending register: R13 in 'AssignReg'
+
+    local l_3_24, l_3_25 = (string.find)(l_3_15, l_3_23)
+    if l_3_24 == nil then
+      l_3_24 = (string.find)(l_3_1, l_3_23)
+    end
+    if l_3_24 ~= nil then
+      local l_3_26 = (string.rep)("0", 5 - #tostring(l_3_24)) .. l_3_24 .. (string.rep)("0", 5 - #tostring(l_3_25)) .. l_3_25
+      ;
+      (table.insert)(l_3_17, l_3_26 .. " " .. l_3_22)
+    end
+  end
+  ;
+  (table.sort)(l_3_17)
+  local l_3_27 = (l_3_17[1] or ""):gsub("^%d+ ", "")
+  local l_3_28 = {}
+  local l_3_29 = {}
+  l_3_29.ActivitySurrogateDisableTypeCheck = "GetField.*disableActivitySurrogateSelectorTypeCheck.*SetValue.*setMethod"
+  l_3_29.ActivitySurrogateSelector = "ActivitySurrogateSelector.*ObjectSurrogate.*ObjectSerializedRef"
+  l_3_29.AxHostState = "Forms.*AxHost.*State"
+  l_3_29.ClaimsIdentity = "ClaimsIdentity.*m_serializedClaims"
+  l_3_29.ClaimsPrincipal = "ClaimsPrincipal.*m_serializedClaimsIdentities"
+  l_3_29.DataSet = "DataSet.*RemotingFormat"
+  l_3_29.ObjectDataProvider = "ObjectDataProvider.*MethodName"
+  l_3_29.ObjectDataProvider2 = "ObjectDataProvider.*ObjectInstance"
+  l_3_29.PSObject = "Automation.*CimInstance.*RunspaceInvoke"
+  l_3_29.ResourceSet = "ResourceSet.*Hashtable"
+  l_3_29.RolePrincipal = "RolePrincipal.*ClaimsPrincipal.*Identities"
+  l_3_29.SessionSecurityToken = "SecurityContextToken.*ClaimsPrincipal.*BootStrapToken"
+  l_3_29.SessionViewStateHistoryItem = "SessionViewState.*SessionViewStateHistoryItem"
+  l_3_29.TextFormattingRunProperties = "TextFormattingRunProperties.*ForegroundBrush"
+  l_3_29.TextMessagingHostingData = "ApplicationLogic.*TextMessaging.*HostingData.*TextMessagingHostingData"
+  l_3_29.ToolboxItemContainer = "Design.*ToolboxItemContainer"
+  l_3_29.TypeConfuseDelegate = "DelegateSerializationHolder.*targetTypeAssembly"
+  l_3_29.TypeConfuseDelegateMono = "DelegateSerializationHolder.*MemberInfoSerializationHolder.*targetTypeAssembly"
+  l_3_29.WindowsClaimsIdentity = "WindowsClaimsIdentity.*actor"
+  l_3_29.WindowsIdentity = "WindowsIdentity.*actor"
+  l_3_29.WindowsPrincipal = "WindowsPrincipal.*actor"
+  for l_3_33,l_3_34 in pairs(l_3_29) do
+    do
+      do
+        if not (string.find)(l_3_0, l_3_34) then
+          local l_3_35, l_3_36, l_3_37 = (string.find)(l_3_1, l_3_34)
+        end
+        -- DECOMPILER ERROR at PC269: Confused about usage of register: R15 in 'UnsetPending'
+
+        -- DECOMPILER ERROR at PC278: Confused about usage of register: R15 in 'UnsetPending'
+
+        -- DECOMPILER ERROR at PC283: Confused about usage of register: R15 in 'UnsetPending'
+
+        if l_3_35 ~= nil then
+          (table.insert)(l_3_28, (string.rep)("0", 5 - #tostring(l_3_35)) .. l_3_35 .. " " .. l_3_33)
+        end
+        -- DECOMPILER ERROR at PC288: LeaveBlock: unexpected jumping out DO_STMT
+
+      end
+    end
+  end
+  ;
+  (table.sort)(l_3_28)
+  if l_3_27 == "FsPickler" then
+    l_3_28 = l_3_28[#l_3_28]
+  else
+    l_3_28 = l_3_28[1]
+  end
+  do
+    do return (l_3_28 or ""):gsub("^%d+ ", ""), l_3_27, l_3_16 end
+    -- DECOMPILER ERROR at PC311: freeLocal<0 in 'ReleaseLocals'
+
+  end
+end
+
+local l_0_6 = function(l_4_0, l_4_1)
+  -- function num : 0_3 , upvalues : l_0_1, l_0_2
+  local l_4_2 = ""
+  local l_4_3 = ""
+  local l_4_4 = {}
+  local l_4_5 = l_0_1(l_4_0, l_4_1)
+  for l_4_9 = #l_4_5, 1, -1 do
+    local l_4_10, l_4_11, l_4_12 = l_0_2(l_4_5[l_4_9])
+    if l_4_10 ~= "" or l_4_12 ~= "" then
+      local l_4_13 = table.insert
+      local l_4_14 = l_4_4
+      local l_4_15 = {}
+      l_4_15.Chain = l_4_10
+      l_4_15.Format = l_4_11
+      l_4_15.Payload = l_4_12
+      l_4_13(l_4_14, l_4_15)
+    end
+    do
+      do
+        if #l_4_2 == 0 then
+          l_4_2 = l_4_10
+        end
+        if #l_4_3 == 0 then
+          l_4_3 = l_4_11
+        end
+        -- DECOMPILER ERROR at PC34: LeaveBlock: unexpected jumping out DO_STMT
+
+      end
+    end
+  end
+  if l_4_3 == "" then
+    l_4_3 = "UnknownFormatter"
+  end
+  return l_4_2, l_4_3, l_4_4
+end
+
+;
+(mp.readprotection)(true)
+local l_0_7, l_0_8, l_0_9 = {}, {}
+if l_0_6((mp.readfile)(0, (mp.getfilesize)() or 0)) == "" then
+  return mp.CLEAN
+end
+for l_0_13,l_0_14 in pairs(R11_PC39) do
+  local l_0_10, l_0_11, l_0_12 = nil
+  -- DECOMPILER ERROR at PC41: Confused about usage of register: R14 in 'UnsetPending'
+
+  if not R14_PC41.Format then
+    do
+      (table.insert)(l_0_7, R14_PC41.Chain .. " (" .. (R14_PC41.Chain == "" or "Unknown Formatter") .. ")")
+      if R14_PC41.Payload ~= "" then
+        (table.insert)(l_0_8, R14_PC41.Payload)
+      end
+      -- DECOMPILER ERROR at PC64: LeaveBlock: unexpected jumping out IF_THEN_STMT
+
+      -- DECOMPILER ERROR at PC64: LeaveBlock: unexpected jumping out IF_STMT
+
+    end
+  end
+end
+;
+(table.remove)(l_0_7, 1)
+if #l_0_7 > 0 then
+  l_0_7 = (table.concat)(l_0_7, ", ")
+else
+  l_0_7 = "None"
+end
+if #l_0_8 > 0 then
+  l_0_8 = (table.concat)(l_0_8, " AND ")
+else
+  l_0_8 = "Unknown"
+end
+local l_0_15 = nil
+local l_0_16 = nil
+if next(extract_interesting_http_headers(l_0_9)) then
+  local l_0_17 = nil
+  local l_0_18 = nil
+  for l_0_22,l_0_23 in pairs(l_0_18) do
+    local l_0_19, l_0_20, l_0_21 = {SIG_CONTEXT = "LUA_GENERIC", TAG = "NOLOOKUP", IdentifiedChains = l_0_7, IdentifiedPayloads = l_0_8}, {}, {}
+    -- DECOMPILER ERROR at PC115: Confused about usage of register: R17 in 'UnsetPending'
+
+    ;
+    (table.insert)(l_0_20, R14_PC41.Payload)
+    -- DECOMPILER ERROR at PC120: Confused about usage of register: R18 in 'UnsetPending'
+
+    ;
+    (table.insert)(l_0_21, " (")
+  end
+  -- DECOMPILER ERROR at PC126: Confused about usage of register: R12 in 'UnsetPending'
+
+  -- DECOMPILER ERROR at PC129: Confused about usage of register: R11 in 'UnsetPending'
+
+  -- DECOMPILER ERROR at PC129: Confused about usage of register: R11 in 'UnsetPending'
+
+  l_0_19.HTTPHeaders = (table.concat)(l_0_20, ", ")
+  -- DECOMPILER ERROR at PC131: Confused about usage of register: R13 in 'UnsetPending'
+
+  -- DECOMPILER ERROR at PC132: Confused about usage of register: R11 in 'UnsetPending'
+
+  SafeGetUrlReputation(l_0_21, l_0_19, true, 30)
+else
+  do
+    local l_0_24 = nil
+    do
+      do
+        local l_0_25 = nil
+        -- DECOMPILER ERROR at PC141: Confused about usage of register: R11 in 'UnsetPending'
+
+        SafeGetUrlReputation({"http://serializedobject.malicious"}, l_0_19, true, 30)
+        do return mp.INFECTED end
+        -- DECOMPILER ERROR at PC148: freeLocal<0 in 'ReleaseLocals'
+
+      end
+    end
+  end
+end
+

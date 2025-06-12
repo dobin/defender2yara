@@ -1,0 +1,54 @@
+-- Decompiled using luadec 2.2 rev: 895d923 for Lua 5.1 from https://github.com/viruscamp/luadec
+-- Command line: rules/lua/mpas/2026.bin 
+
+-- params : ...
+-- function num : 0
+local l_0_0 = (mp.GetLnkInfo)()
+if l_0_0 == nil then
+  return mp.CLEAN
+end
+local l_0_1 = l_0_0.Arguments
+if l_0_1 == nil then
+  return mp.CLEAN
+end
+if #l_0_1 < 200 then
+  return mp.CLEAN
+end
+if (string.find)(l_0_1, "\\rdclientwpf\\", 1, true) then
+  return mp.CLEAN
+end
+if (string.find)(l_0_1, ".rdp", 1, true) then
+  return mp.CLEAN
+end
+if (string.find)(l_0_1, "--allow-insecure-localhost", 1, true) then
+  return mp.CLEAN
+end
+if (string.find)(l_0_1, "--load-extension", 1, true) then
+  return mp.CLEAN
+end
+local l_0_2 = l_0_0.BasePath
+if l_0_2 and (string.find)(l_0_2, "BlueStacks", 1, true) then
+  return mp.CLEAN
+end
+if l_0_2 and (string.find)(l_0_2, "QQPCMgr", 1, true) then
+  return mp.CLEAN
+end
+local l_0_3 = (string.find)(l_0_1, "    ", 1, true)
+if l_0_3 ~= nil then
+  do
+    if ((((string.find)(l_0_1, "\t", 1, true) and not (string.find)(l_0_1, "\n", 1, true)) or (string.find)(l_0_1, "\v", 1, true)) and not (string.find)(l_0_1, "\f", 1, true)) or (string.find)(l_0_1, "\r", 1, true) then
+      local l_0_4, l_0_5 = 0 + 1 + 1 + 1 + 1 + 1
+    end
+    -- DECOMPILER ERROR at PC157: Confused about usage of register: R4 in 'UnsetPending'
+
+    if l_0_4 > 1 then
+      (mp.set_mpattribute)("Lua:LNKWithLongWhiteSpacesAndSuspChars")
+      return mp.INFECTED
+    end
+    ;
+    (mp.set_mpattribute)("Lua:LNKWithLongWhiteSpaces")
+    do return mp.INFECTED end
+    return mp.CLEAN
+  end
+end
+
