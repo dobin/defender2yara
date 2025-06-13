@@ -19,6 +19,27 @@ def hexdump(data, length=16):
         print(format_line(i, line))
 
 
+def hexdump_s(data, length=16) -> str:
+    """
+    Display a hexadecimal dump of byte data.
+
+    Args:
+        data (bytes): The byte data to be displayed.
+        length (int): The number of bytes per line (default is 16).
+    """
+    def format_line(addr, line):
+        hex_part = ' '.join(f'{byte:02x}' for byte in line)
+        ascii_part = ''.join(chr(byte) if 32 <= byte < 127 else '.' for byte in line)
+        return f'{addr:08x}  {hex_part:<{length * 3}}  {ascii_part}'
+
+    ret = ""
+    for i in range(0, len(data), length):
+        line = data[i:i + length]
+        ret += format_line(i, line) + "\n"
+    
+    return ret
+
+
 def is_printable_ascii(data: Union[bytes,str]) -> bool:
     """
     Check if all characters in the byte data are printable ASCII characters.

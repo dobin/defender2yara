@@ -6,6 +6,7 @@ from typing import List, Tuple
 from defender2yara.defender.dbthreat import db, DbThreat
 import urllib.parse
 import pickle
+from defender2yara.util.utils import hexdump_s
 
 views = Blueprint('views', __name__)
 logger = logging.getLogger("Views")
@@ -25,8 +26,25 @@ def get_threat():
     print("Searching for threat:", threat_name)
     dbThreat = DbThreat.get(DbThreat.name == threat_name)
     threat = pickle.loads(dbThreat.threatObject)
+
+    skip_signatures = [
+        "HSTR_EXT_SIGS",
+        "SIGNATURE_TYPE_PEHSTR",
+        "SIGNATURE_TYPE_THREAT_BEGIN",
+        "SIGNATURE_TYPE_THREAT_END",
+        "SIGNATURE_TYPE_LUASTANDALONE",
+    ]
+
+    sigs = []
+    for sig in threat.signatures:
+        if sig.sig_type in skip_signatures or "HSTR_EXT" in sig.sig_type: 
+                continue
+        s = ""
+        s += "{} {} {}\n".format(sig.sig_type_id, sig.sig_type, sig.size)
+        s += hexdump_s(sig.sig_data)
+        sigs.append(s)
     
-    return render_template('threat.html', threat=threat)
+    return render_template('threat.html', threat=threat, signatures=sigs)
 
 
 @views.route("/search/<threat_name>")
@@ -46,4 +64,10 @@ def search_threat(threat_name: str):
 def urlencode_filter(s):
     if isinstance(s, str):
         return urllib.parse.quote_plus(s)
+    return s
+
+@views.app_template_filter('hexencode')
+def hexencode_filter(s):
+    if isinstance(s, str):
+        return hexdump_s(s)
     return s
