@@ -1,0 +1,24 @@
+
+<h1>Threat</h1>
+
+Name: {{ threat.name }} {{ threat.id }} {{ threat.category}} {{ threat.severity}}
+{{ threat.type }} {{ threat.platform }}  {{ threat.family }}  {{ threat.variant }}  {{ threat.suffixes }}
+
+
+<h2> Yara Signatures</h2>
+{% for sig in threat.yara_rules %}
+    <div class="sig">
+        <pre>
+        {{sig}}
+        </pre>
+    </div>
+{% endfor %}
+
+<h2> Lua Scripts</h2>
+{% for script in threat.lua_scripts %}
+    <div class="script">
+        <pre>
+        {{script}}
+        </pre>
+    </div>
+{% endfor %}
