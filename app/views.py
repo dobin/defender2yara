@@ -47,9 +47,9 @@ def get_threat():
     return render_template('threat.html', threat=threat, signatures=sigs)
 
 
-@views.route("/search/<threat_name>")
-def search_threat(threat_name: str):
-
+@views.route("/search")
+def search_threat():
+    threat_name = request.args.get('threat_name', '').strip()
     if not threat_name:
         return redirect(url_for('views.index'))
     

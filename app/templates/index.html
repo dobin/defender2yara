@@ -10,14 +10,23 @@
 
     <h1> DefenderSearch </h1>
 
-  </div>
+    Examples:
+    <ul>
+      <li>Frethog.AB</li>
+      <li>Win32/Bearfoos</li>
+    </ul>
 
-  <script>
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
-  </script>
+    <form action="/search" method="get">
+      <input type="text" name="threat_name" required>
+      <button type="submit">Search</button>
+    </form>
+
+  <br>
+  <h2>Source</h2>
+
+  Source at <a href="https://github.com/dobin/defender2yara">github.com/dobin/defender2yara</a>,
+
+  </div>
 
   </body>
 </html>
