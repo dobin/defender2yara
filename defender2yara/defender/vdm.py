@@ -88,6 +88,9 @@ class Vdm:
     def get_threats(self) -> List[Threat]:
         return self.threats
     
+    def get_signatures(self) -> List[BaseSig]:
+        return self.signatures
+    
     def write_cache(self, cache, name):
         filename = os.path.join(cache, name + ".vdm.pickle")
         with open(filename, "wb") as f:
@@ -126,6 +129,7 @@ class Vdm:
         # parse
         while ptr < len(data):
             sig_type = SIG_TYPES[data[ptr]]
+            
             if sig_type == "SIGNATURE_TYPE_THREAT_BEGIN":
                 entry = ThreatBeginSig(data,ptr)
             elif sig_type == "SIGNATURE_TYPE_THREAT_END":
@@ -171,7 +175,7 @@ class Vdm:
                 threat = None
             if threat:
                 threat.add_signature(sig)
-            
+
             progress_bar.update(1)
 
         progress_bar.close()

@@ -2,8 +2,23 @@ import struct
 import argparse
 import sys
 import io
+import subprocess
 
 
+def lua_disassemble(filepath) -> bytes:
+    #filepath = "data/lua_1_fixed.bin"
+    result = subprocess.run(["./luadec", filepath], capture_output=True)
+
+    if result.returncode == 0:
+        return result.stdout
+    else:
+        print("Decompilation failed with error code:", result.returncode)
+        print("Error message:", result.stderr)
+        return None
+    
+
+
+# copy of https://raw.githubusercontent.com/commial/experiments/refs/heads/master/windows-defender/lua/parse.py
 
 def fixup_lua_data(data: bytes) -> bytes:
     #fdesc = open(options.target, "rb")

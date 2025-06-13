@@ -1,5 +1,6 @@
 data/
 rules/
+cache/
 
 # windows defender artifacts
 

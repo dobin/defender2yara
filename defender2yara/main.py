@@ -4,14 +4,16 @@ import sys
 import shutil
 import yara
 from collections import defaultdict
+from peewee import Model, CharField, SqliteDatabase, BlobField, IntegerField
 
 from defender2yara.defender.threat import Threat
 from defender2yara.yara.rule import YaraRule
 from defender2yara.defender.vdm import Vdm
 from defender2yara.defender.download import get_latest_signature_vdm, download_latest_signature, parse_mpam_exe
-from defender2yara.defender.luaparse import fixup_lua_data
+from defender2yara.defender.luaparse import fixup_lua_data, lua_disassemble
 from defender2yara.defender.signature import *
-
+from defender2yara.util.utils import hexdump
+import pickle
 from tqdm import tqdm
 import logging
 
@@ -130,6 +132,294 @@ def parse_asr(vdm: Vdm):
         progress_bar.close()
 
 
+def parse_sig_lua(vdm:Vdm, name: str):
+    logger.info("Parsing Threat Lua signatures...")
+    signatures = vdm.get_signatures()
+
+    n = 0
+    for sig in signatures:
+        if sig.sig_type == "SIGNATURE_TYPE_LUASTANDALONE":
+            lua_header_offset = sig.sig_data.find(b'\x1bLuaQ')
+            lua_data = fixup_lua_data(sig.sig_data[lua_header_offset:])
+            if lua_data != None:
+                # write file
+                filepath = os.path.join("rules", "lua", name, "{}.bin".format(n))
+                os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                #print("Write file raw: {}".format(filepath))
+                with open(filepath, "wb") as f:
+                    f.write(lua_data)
+
+                # convert
+                lua_disassembled = lua_disassemble(filepath)
+
+                # write disassembled lua to file
+                filepath2 = filepath + ".txt"
+                if lua_disassembled is not None:
+                    with open(filepath2, "wb") as f:
+                        f.write(lua_disassembled)
+
+                    #print("Lua signature full written to: {}".format(filepath2))
+                else:
+                    #print("Lua signature only raw written to: {}".format(filepath2))
+                    pass
+
+            n += 1
+
+
+def parse_threat_lua(vdm:Vdm):
+    logger.info("Parsing Threat Lua signatures...")
+    results:Dict[Threat,List[str]] = defaultdict(list)
+    threats = vdm.get_threats()
+
+    progress_bar = tqdm(
+            total=len(threats),
+            unit='threat',
+            bar_format='{l_bar}{bar:20}{r_bar}',
+            colour='green',
+            desc="Converting signatures",
+            leave=False)
+
+    count = 0
+    for threat in threats:
+        print("Threat: {} ({}) - TC:{} TT:{} TP:{} TF:{} TV:{} -> {}".format(
+            threat.threat_name,
+            threat.threat_id,
+            threat.category_id,
+            threat.threat_type,
+            threat.threat_platform,
+            threat.threat_family,
+            threat.threat_variant,
+            len(threat.signatures)
+        ))
+        #for sig in threat.signatures:
+        #    print("  Signature: {} ({})  Size:{}".format(
+        #        sig.sig_type_id,
+        #        sig.sig_type,
+        #        sig.size
+        #    ))
+
+
+        if False:
+            luas = []
+
+            for sig in threat.signatures:
+                if sig.sig_type == "SIGNATURE_TYPE_LUASTANDALONE":
+                    print("  Lua signature found: {}".format(sig.sig_name))
+
+                    lua_header_offset = sig.sig_data.find(b'\x1bLuaQ')
+                    lua_data = fixup_lua_data(sig.sig_data[lua_header_offset:])
+                    if lua_data:
+                        luas.append(lua_data)
+                    else:
+                        print("  Invalid Lua signature data found in threat: {}".format(threat.threat_name))
+
+            print("  Lua signatures found: {}".format(len(luas)))
+            if len(luas) != 0:
+                # write file
+                if False:
+                    print("Lua Event: {} ({}) - TC:{} TT:{} TP:{} TF:{} TV:{}".format(
+                        threat.threat_name,
+                        threat.threat_id,
+                        threat.category_id,
+                        threat.threat_type,
+                        threat.threat_platform,
+                        threat.threat_family,
+                        threat.threat_variant
+                    ))
+
+                # rules/[Exploit/Trojan/VirTool/...]
+                filepath = os.path.join("rules", threat.threat_type)
+                filepath = os.path.join(filepath, "lua")
+
+                # rules/Exploit/Exploit:Win32/CVE-2015-2545.A
+                # replace: space / : 
+                threat_name = threat.threat_name.replace(" ", "_").replace("/", "_").replace(":", "_").replace("\\", "_")
+
+                # create directory if not exists
+                os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+                n = 0
+                for lua in luas:
+                    fname = "{}_{}.bin".format(threat_name, n)
+                    filepath = os.path.join(filepath, fname)
+
+                    # raw
+                    print("Write raw: {}".format(filepath))
+                    with open(filepath, "wb") as f:
+                        f.write(lua)
+
+                    # convert
+                    lua_disassembled = lua_disassemble(filepath)
+                    if lua_disassembled is not None:
+                        with open(filepath + ".txt", "wb") as f:
+                            f.write(lua)
+                            f.write("Lua rule for {}\n".format(threat.threat_name).encode('utf-8'))
+                            f.write("Threat ID: {}\n".format(threat.threat_id).encode('utf-8'))
+                            f.write("Category ID: {}\n".format(threat.category_id).encode('utf-8'))
+                            f.write("Threat Type: {}\n".format(threat.threat_type).encode('utf-8'))
+                            f.write("Threat Platform: {}\n".format(threat.threat_platform).encode('utf-8'))
+                            f.write("Threat Family: {}\n".format(threat.threat_family).encode('utf-8'))
+                            f.write("Threat Variant: {}\n\n".format(threat.threat_variant).encode('utf-8'))
+                            f.write(lua_disassembled.encode('utf-8'))
+                            f.write(b"\n\n")
+                n += 1
+
+        progress_bar.update(1)
+
+        count += 1
+
+        if count == 100:
+            break
+
+    progress_bar.close()
+    return results
+
+
+def parse_threats_by_name(vdm:Vdm, search: str):
+    logger.info("Parsing Threats for name: {}".format(search))
+    threats = vdm.get_threats()
+    for threat in threats:
+        if search in threat.threat_name:
+            print("Threat: {} ({}) - TC:{} TT:{} TP:{} TF:{} TV:{}  Sigs:{}".format(
+                threat.threat_name,
+                threat.threat_id,
+                threat.category_id,
+                threat.threat_type,
+                threat.threat_platform,
+                threat.threat_family,
+                threat.threat_variant,
+                len(threat.signatures)
+            ))
+
+            if True:
+                for sig in threat.signatures:
+                    print("  {} Signature: {} ({})  Size:{}".format(
+                        threat.threat_name,
+                        sig.sig_type_id,
+                        sig.sig_type,
+                        sig.size
+                    ))
+                    hexdump(sig.sig_data)
+
+
+db = SqliteDatabase('threats.db')
+
+class BaseModel(Model):
+    class Meta:
+        database = db
+
+class DbThreat(BaseModel):
+    name = CharField()
+    sigs = CharField()
+    sigcount = IntegerField()
+    threatObject = BlobField()
+
+
+class NiceThreat():
+    def __init__(self, threat:Threat):
+        self.name = threat.threat_name
+        self.id = threat.threat_id
+        self.category = threat.category_id
+        self.severity = threat.severity
+        self.type = threat.threat_type
+        self.platform = threat.threat_platform
+        self.family = threat.threat_family
+        self.variant = threat.threat_variant
+        self.suffixes = threat.threat_suffixes
+
+        self.signatures = threat.signatures
+        self.lua_scripts = []
+        self.yara_rules= []
+
+    def __str__(self):
+        return f"{self.name} ({self.id}) - {self.type} {self.platform} {self.family} {self.variant}"
+
+
+# convert
+def convert_threats(vdm:Vdm):
+    logger.info("Converting threats to database...")
+    threats = vdm.get_threats()
+
+    db.connect()
+    db.create_tables([DbThreat])
+
+    progress_bar = tqdm(
+        total=len(threats),
+        unit='threat',
+        bar_format='{l_bar}{bar:20}{r_bar}',
+        colour='green',
+        desc="Converting signatures",
+        leave=False)
+
+    n = 0
+    for threat in threats:
+        name = threat.threat_name
+
+        sig_unique = set()
+        for sig in threat.signatures:
+            if sig.sig_type not in sig_unique:
+                sig_unique.add(sig.sig_type)
+            else:
+                continue
+        sigs = " ".join(sig_unique)
+
+        niceThreat = NiceThreat(threat)
+        niceThreat.lua_scripts = get_lua_from_threat(threat)
+        niceThreat.yara_rules = get_yara_from_threat(threat)
+
+        threatObj = pickle.dumps(niceThreat)
+        DbThreat.create(
+            name=name,
+            sigs=sigs,
+            sigcount=len(threat.signatures),
+            threatObject=threatObj
+        )
+
+        progress_bar.update(1)
+
+    progress_bar.close()
+    db.close()
+
+
+def get_lua_from_threat(threat:Threat) -> List[bytes]:
+    lua_scripts = []
+    for sig in threat.signatures:
+        if sig.sig_type == "SIGNATURE_TYPE_LUASTANDALONE":
+            lua_header_offset = sig.sig_data.find(b'\x1bLuaQ')
+            lua_data = fixup_lua_data(sig.sig_data[lua_header_offset:])
+            if lua_data != None:
+                # write file
+                filepath = os.path.join("cache", "lua.tmp")
+                os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                with open(filepath, "wb") as f:
+                    f.write(lua_data)
+
+                # convert
+                lua_disassembled = lua_disassemble(filepath)
+                lua_scripts.append(lua_disassembled)
+
+    return lua_scripts
+
+
+def get_yara_from_threat(threat:Threat) -> List[str]:
+    result = []
+
+    yara_rules = YaraRule(threat,filesize_check="20MB",do_header_check=False)
+    if not yara_rules:
+        return result
+    
+    for yara_rule in yara_rules.generate_rules():
+        try:
+            yara.compile(source=yara_rule)
+        except yara.SyntaxError as e:
+            logger.warn(f"Failed to convert {threat.threat_name}: {str(e)}")
+            logger.debug("\n"+yara_rule)
+            continue
+        result.append(yara_rule)
+
+    return result
+
+
 def covert_vdm_to_yara(vdm:Vdm,filesize_check:str,header_check:bool=False) -> Tuple[Dict[Threat,List[str]],int]:
     logger.info(f"Parsing signature database...")
     results:Dict[Threat,List[str]] = defaultdict(list)
@@ -229,7 +519,6 @@ def main(args):
         vdm_delta_path = os.path.join(cache_dir,"vdm",major_version,minor_version)
         
         for name in ["mpav","mpas"]:
-        #for name in ["mpas"]:  #####################
             base_file = os.path.join(vdm_base_path,name+"base.vdm")
             delta_file = os.path.join(vdm_delta_path,name+"dlta.vdm")
         
@@ -255,7 +544,25 @@ def main(args):
                 vdm.write_cache(args.cache, name)
                 logger.info("Cache written")
             else:
-                parse_asr(vdm)
+                # extract ASR entries - around 24
+                #parse_asr(vdm)
+
+                # extract all threats with LUA
+                #parse_threat_lua(vdm)
+
+                # extract all LUA - around 50k, including ASR
+                #parse_sig_lua(vdm, name)
+
+                # extract all threats
+                #parse_threats(vdm, search="Bearfoos.A!ml")
+
+                # find a threat
+                #find = "Bearfoos.A"
+                #logger.info(f"Searching for threats with name: {find}")
+                #parse_threats(vdm, search=find)
+
+                # convert threats to database
+                convert_threats(vdm)
 
                 if False: # no yara atm
                     results,rule_counts = covert_vdm_to_yara(vdm,args.filesize_check,args.header_check)
