@@ -1,0 +1,19 @@
+
+<h1>Threats</h1>
+
+
+<div class="threat">
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Sigs</th>
+        </tr>
+        
+        {% for threat in threats %}
+        <tr>
+            <td><a href="/threat?name={{threat.name | urlencode }}">{{ threat.name }}</a></td>
+            <td>{{ threat.sigs }} ({{ threat.sigcount }})</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
