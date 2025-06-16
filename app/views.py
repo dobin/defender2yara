@@ -23,7 +23,7 @@ def get_threat():
     if not threat_name:
         return redirect(url_for('views.index'))
     
-    print("Searching for threat:", threat_name)
+    print("Showing threat:", threat_name, flush=True)
     dbThreat = DbThreat.get(DbThreat.name == threat_name)
     threat = pickle.loads(dbThreat.threatObject)
 
@@ -55,7 +55,7 @@ def search_threat():
     
     print("Searching for threat:", threat_name)
     dbThreats = DbThreat.select().where(DbThreat.name.contains(threat_name))
-    print("Found", len(dbThreats), "threats in the database.")
+    print("Found", len(dbThreats), "threats in the database.", flush=True)
     
     return render_template('threats.html', threats=dbThreats, threat_name=threat_name)
 

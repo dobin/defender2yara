@@ -12,7 +12,7 @@ from app.views import views
 
 
 if __name__ == "__main__":
-	logging.getLogger('werkzeug').setLevel(logging.ERROR)
+	logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--listenip', type=str, help='IP to listen on', default="0.0.0.0")
@@ -20,6 +20,7 @@ if __name__ == "__main__":
 	parser.add_argument('--debug', action='store_true', help='Debug', default=False)
 	args = parser.parse_args()
 
+	print("defender2db web interface")
 	print("Listen on: {} {}".format(args.listenip, args.listenport))
 
 	root_folder = os.path.dirname(__file__)
