@@ -41,9 +41,26 @@
         </div>
     {% endfor %}
 
-    <h2> Signatures </h2>
+
+    <h2> Revoked Certificates </h2>
+
+    {% if threat.revoked_certs|length == 0 %}
+        <p>No revoked certificates found for this threat.</p>
+    {% endif %}
+
+    {% for cert in threat.revoked_certs %}
+        <div class="cert">
+            Thumbprint: {{cert}} <br>
+        </div>
+    {% endfor %}
+    <br>
+
+
+    <h2> Other Signatures </h2>
     {% if signatures|length == 0 %}
         <p>No further sigs found for this threat.</p>
+    {% else %}
+        Purpose of these signatures are mostly unknown. <br><br>
     {% endif %}
 
     {% for sig in signatures %}

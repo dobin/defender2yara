@@ -33,12 +33,20 @@ def get_threat():
         "SIGNATURE_TYPE_THREAT_BEGIN",
         "SIGNATURE_TYPE_THREAT_END",
         "SIGNATURE_TYPE_LUASTANDALONE",
+        "SIGNATURE_TYPE_REVOKED_CERTIFICATE"
     ]
 
     sigs = []
+    threat.revoked_certs = []
     for sig in threat.signatures:
+        # more parsing
+        if sig.sig_type == "SIGNATURE_TYPE_REVOKED_CERTIFICATE":
+            threat.revoked_certs.append(sig.sig_data[3:23].hex())
+            continue
+
         if sig.sig_type in skip_signatures or "HSTR_EXT" in sig.sig_type: 
-                continue
+            continue
+
         s = ""
         s += "{} {} {}\n".format(sig.sig_type_id, sig.sig_type, sig.size)
         s += hexdump_s(sig.sig_data)

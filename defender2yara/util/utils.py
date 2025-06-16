@@ -2,13 +2,6 @@ from typing import Union
 import re
 
 def hexdump(data, length=16):
-    """
-    Display a hexadecimal dump of byte data.
-
-    Args:
-        data (bytes): The byte data to be displayed.
-        length (int): The number of bytes per line (default is 16).
-    """
     def format_line(addr, line):
         hex_part = ' '.join(f'{byte:02x}' for byte in line)
         ascii_part = ''.join(chr(byte) if 32 <= byte < 127 else '.' for byte in line)
@@ -20,13 +13,6 @@ def hexdump(data, length=16):
 
 
 def hexdump_s(data, length=16) -> str:
-    """
-    Display a hexadecimal dump of byte data.
-
-    Args:
-        data (bytes): The byte data to be displayed.
-        length (int): The number of bytes per line (default is 16).
-    """
     def format_line(addr, line):
         hex_part = ' '.join(f'{byte:02x}' for byte in line)
         ascii_part = ''.join(chr(byte) if 32 <= byte < 127 else '.' for byte in line)
