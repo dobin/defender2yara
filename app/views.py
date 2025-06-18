@@ -79,3 +79,10 @@ def hexencode_filter(s):
     if isinstance(s, str):
         return hexdump_s(s)
     return s
+
+@views.app_template_filter('bytes_to_str')
+def bytes_to_str(s: bytes) -> str:
+    if isinstance(s, bytes):
+        return s.decode('utf-8', errors='replace')
+    return str(s)
+

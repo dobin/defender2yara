@@ -36,7 +36,7 @@
 
     {% for script in threat.lua_scripts %}
         <div class="script">
-            <pre>{{script}}
+            <pre>{{script|bytes_to_str}}
             </pre>
         </div>
     {% endfor %}
