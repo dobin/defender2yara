@@ -1,15 +1,17 @@
-# defender2db / defender2yara
+# defender2db
 
 A modification of [defender2yara](https://github.com/t-tani/defender2yara/). 
 
 Live at [defendersearch.r00ted.ch](https://defendersearch.r00ted.ch)
-
 
 * Add LUA parsing
 * Push Defender data into a Sqlite DB
 * Web interface for searching
 
 Its work in progress.
+
+Microsoft ASR rules are in [result/asr_rules](https://github.com/dobin/defender2yara/tree/main/result/asr_rules).
+All 50'000 LUA scripts are in [result/lua](https://github.com/dobin/defender2yara/tree/main/result/lua).
 
 
 ## Installation using `Poetry`
