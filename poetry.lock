@@ -299,6 +299,18 @@ files = [
 ]
 
 [[package]]
+name = "packaging"
+version = "25.0"
+description = "Core utilities for Python packages"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484"},
+    {file = "packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"},
+]
+
+[[package]]
 name = "peewee"
 version = "3.18.1"
 description = "a little orm"
@@ -507,4 +519,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "b9845c9e0b0b71693bf9f2641a2f6f737731c447d3f681f7132735a29c68842d"
+content-hash = "c884b229e443395fc460078c67e02997bb3a12093e3ceb281a58467ceb2c1751"

@@ -6,6 +6,7 @@ import yara
 from collections import defaultdict
 from peewee import Model, CharField, SqliteDatabase, BlobField, IntegerField
 from defender2yara.defender.dbthreat import NiceThreat, DbThreat, db
+from packaging.version import Version
 
 from defender2yara.defender.threat import Threat
 from defender2yara.yara.rule import YaraRule
@@ -305,8 +306,13 @@ def parse_threats_by_name(vdm:Vdm, search: str):
 
 # convert
 def convert_threats(vdm:Vdm):
-    logger.info("Converting threats to database...")
+    logger.info("Writing threats to database: {}".format(db.database))
+    logger.info("Sit back and relax")
     threats = vdm.get_threats()
+
+    if os.path.exists(db.database):
+        logger.info("Database already exists, removing it.")
+        os.remove(db.database)
 
     db.connect()
     db.create_tables([DbThreat])
@@ -423,123 +429,125 @@ def covert_vdm_to_yara(vdm:Vdm,filesize_check:str,header_check:bool=False) -> Tu
     return results,rule_count
 
 
+cache_dir = "cache"
+
+
+def get_latest_engine_version(engine_path):
+    versions = []
+    for entry in os.listdir(engine_path):
+        try:
+            versions.append(Version(entry))
+        except:
+            continue
+    return str(max(versions)) if versions else None
+
+def get_latest_signature_version(vdm_path):
+    major_minor_versions = []
+    for entry in os.listdir(vdm_path):
+        if os.path.isdir(os.path.join(vdm_path, entry)):
+            try:
+                major_minor_versions.append(Version(entry))
+            except:
+                continue
+    if not major_minor_versions:
+        return None
+
+    latest_major_minor = str(max(major_minor_versions))
+    sub_path = os.path.join(vdm_path, latest_major_minor)
+    builds = []
+    for entry in os.listdir(sub_path):
+        try:
+            builds.append(Version(entry))
+        except:
+            continue
+
+    if not builds:
+        return None
+
+    latest_build = str(max(builds))
+    return f"{latest_major_minor}.{latest_build}"
+
+
 def main(args):
-    cache_dir = args.cache
     signature_version:str = ""
     engine_version:str = ""
 
-    if args.latest_signature_version:
-        url, signature_version, engine_version = get_latest_signature_vdm(proxy=args.proxy)
-        print(f"{signature_version}")
-        sys.exit(0)
-
-    if args.cacheonly:
-        signature_version = "1.429.489.0"
-        engine_version = "1.1.25040.1"
-        use_cache = False
-    else:
-        if (args.download or not args.base) and not args.mpam:
-            logger.info("Downloading latest signature database.")
-            signature_version, engine_version, use_cache = download_latest_signature(cache_dir,proxy=args.proxy)
-            logger.info(f"Complete (use_cache:{use_cache})")
-            logger.info(f"Latest Signature Version:{signature_version}")
-            logger.info(f"Latest Engine Version   :{engine_version}")
-
     if args.download:
-        sys.exit(0)
+        logger.info("Downloading latest signature database")
+        signature_version, engine_version, use_cache = download_latest_signature(cache_dir,proxy=args.proxy)
+        logger.info(f"Written to: {cache_dir}")
+        logger.info(f"  Latest Signature Version:{signature_version}")
+        logger.info(f"  Latest Engine Version   :{engine_version}")
+        return
+    else:
+        logger.info("Using existing signature database")
+        signature_version = get_latest_signature_version(os.path.join(cache_dir,"vdm"))
+        engine_version = get_latest_engine_version(os.path.join(cache_dir,"engine"))
 
-    if args.mpam:
-        signature_version, engine_version = parse_mpam_exe(args.mpam,cache_path=cache_dir,rm_mpam=False)
-        logger.info(f"Loaded {args.mpam}")
-        logger.info(f"Latest Signature Version:{signature_version}")
-        logger.info(f"Latest Engine Version   :{engine_version}")
+        logger.info(f"  Latest Signature Version:{signature_version}")
+        logger.info(f"  Latest Engine Version   :{engine_version}")
 
-    base_file:str = ""
-    delta_file:str = ""
-    results:Dict[Threat,List[str]]
+        if not signature_version:
+            logger.error("No signature version found. Please download the latest signature database with --download option.")
+            sys.exit(1)
 
-    output_path = os.path.join(args.output,signature_version)
-    os.makedirs(output_path, exist_ok=True)
-    logger.info(f"Clean up output directory: {output_path}")
-    clean_up_dir(output_path)
+    # iterate through mpav and mpas - each can take a lot of memory
+    for name in ["mpav","mpas"]:
+        vdm: Vdm = None
 
-    if args.base: # use manually specified vdm files.
-        logger.info(f"Loading base signature file: {args.base}")
-        vdm = Vdm(args.base)
-        if args.delta:
-            logger.info(f"Applying delta patch: {args.delta}")
-            vdm.apply_delta_vdm(args.delta)
-
-        logger.info(f"Target signature version: {vdm.version}")
-        logger.info(f"Target signature type   : {vdm.vdm_type}")
-
-        results,rule_counts = covert_vdm_to_yara(vdm,args.filesize_check,args.header_check)
-        logger.info(f"Convert {rule_counts} signatures.")
-
-        if args.single_file:
-            write_rules_to_single_file(output_path,vdm.vdm_type,results)
-        else:
-            write_rules_by_family(output_path,results)
-    else: # use vdm files parsed from mpam-fe.exe
-        major_version = ".".join(signature_version.split(".")[0:2])
-        minor_version = ".".join(signature_version.split(".")[2:4])
-        vdm_base_path = os.path.join(cache_dir,"vdm",major_version,'0.0')
-        vdm_delta_path = os.path.join(cache_dir,"vdm",major_version,minor_version)
-        
-        for name in ["mpav","mpas"]:
+        if args.frompickle:  # Load from cache/*.vdm.pickle
+            logger.info(f"Loading vdm cache: {cache_dir}")
+            vdm = Vdm.make_from_cache(cache_dir,name)
+            logger.info("VDM from cache: signatures: {}  threats: {}".format(
+                len(vdm.signatures),
+                len(vdm.threats)))
+        else:  # convert from the latest signature files: cache/[engine, vdm] (takes some time)
+            major_version = ".".join(signature_version.split(".")[0:2])
+            minor_version = ".".join(signature_version.split(".")[2:4])
+            vdm_base_path = os.path.join(cache_dir,"vdm",major_version,'0.0')
+            vdm_delta_path = os.path.join(cache_dir,"vdm",major_version,minor_version)
             base_file = os.path.join(vdm_base_path,name+"base.vdm")
             delta_file = os.path.join(vdm_delta_path,name+"dlta.vdm")
         
             logger.info(f"Loading base signature file: {base_file}")
-            if args.cacheonly:
-                logger.info(f"Loading vdm cache: {args.cache}")
-                vdm = Vdm.make_from_cache(cache_dir,name)
-                logger.info("VDM from cache: signatures: {}  threats: {}".format(
-                    len(vdm.signatures),
-                    len(vdm.threats)))
-            else:
-                logger.info(f"Creating vdm from files: {vdm_base_path}")
-                vdm = Vdm(base_file)
-                vdm.parse_files()
-                if os.path.exists(delta_file):
-                    logger.info(f"Applying delta patch: {delta_file}")
-                    vdm.apply_delta_vdm(delta_file)
+            logger.info(f"Creating vdm from files: {vdm_base_path}")
+            vdm = Vdm(base_file)
+            vdm.parse_files()
+            if os.path.exists(delta_file):
+                logger.info(f"Applying delta patch: {delta_file}")
+                vdm.apply_delta_vdm(delta_file)
 
-            logger.info(f"Target signature version: {vdm.version}")
-            logger.info(f"Target signature type   : {vdm.vdm_type}")
+        #logger.info(f"VDM Target signature version: {vdm.version}")
+        #logger.info(f"VDM Target signature type   : {vdm.vdm_type}")
 
-            if args.writecache:
-                vdm.write_cache(args.cache, name)
-                logger.info("Cache written")
-            else:
-                # extract ASR entries - around 24
-                #parse_asr(vdm)
+        if args.topickle:
+            vdm.write_cache(cache_dir, name)
+            logger.info("Pickle Cache written to: {}".format(os.path.join(cache_dir, name + ".vdm.pickle")))
+        elif args.convert:
+            # convert threats to database
+            convert_threats(vdm)
+        elif args.asr:
+            # extract ASR entries
+            parse_asr(vdm)
+        else:
+            # extract ASR entries - around 24
+            #parse_asr(vdm)
 
-                # extract all threats with LUA
-                #parse_threat_lua(vdm)
+            # extract all threats with LUA
+            #parse_threat_lua(vdm)
 
-                # extract all LUA - around 50k, including ASR
-                #parse_sig_lua(vdm, name)
+            # extract all LUA - around 50k, including ASR
+            #parse_sig_lua(vdm, name)
 
-                # extract all threats
-                #parse_threats(vdm, search="Bearfoos.A!ml")
+            # extract all threats
+            #parse_threats(vdm, search="Bearfoos.A!ml")
 
-                # find a threat
-                #find = "Bearfoos.A"
-                #logger.info(f"Searching for threats with name: {find}")
-                #parse_threats(vdm, search=find)
+            # find a threat
+            #find = "Bearfoos.A"
+            #logger.info(f"Searching for threats with name: {find}")
+            #parse_threats(vdm, search=find)
 
-                # convert threats to database
-                convert_threats(vdm)
-
-                if False: # no yara atm
-                    results,rule_counts = covert_vdm_to_yara(vdm,args.filesize_check,args.header_check)
-                    logger.info(f"Convert {rule_counts} signatures")
-
-                    if args.single_file:
-                        write_rules_to_single_file(output_path,vdm.vdm_type,results)
-                    else:
-                        write_rules_by_family(output_path,results)
+            pass
 
     logger.info("Complete")
     sys.exit(0)

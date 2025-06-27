@@ -34,15 +34,48 @@ cd defender2yara
 poetry install
 ```
 
-4. Run it. 
+
+## Usage
+
+Download current VDM into `cache/engine` and `cache/vdm`:
 
 ```sh
-poetry run python -m defender2yara --writecache
-
-poetry run python -m defender2yara --usecache
-
-poetry run python web.py
+poetry run python -m defender2yara --download
 ```
+
+Convert to `./cache/threats.db` SQLite DB. File will be overwritten!
+```sh
+poetry run python -m defender2yara --convert
+```
+
+Display first few entries of the sqlite db:
+
+```sh
+poetry run python tools/dbtest.py
+```
+
+Get the ASR rules into `rules/`:
+
+```sh
+poetry run python -m defender2yara --asr
+```
+
+
+## Pickle Cache
+
+Convert VDM to a mega pickle `cache/mpas.vdm.pickle` and `cache/mpav.vdm.pickle`: 
+
+```sh
+poetry run python -m defender2yara --topickle
+```
+
+Use the pickle instead of converting the VDM (can save a little bit of time):
+
+Also: Convert to a mega pickle: 
+```sh
+poetry run python -m defender2yara --convert --frompickle
+```
+
 
 
 ## Original Acknowledgments / Reference by defender2yara
