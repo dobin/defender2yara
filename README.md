@@ -1,4 +1,13 @@
+# Archived
+
+This repository has been moved/split into: 
+
+* [defender2db](https://github.com/dobin/defender2db/)
+* [defender2db_data](https://github.com/dobin/defender2db_data/)
+
+
 # defender2db
+
 
 A modification of [defender2yara](https://github.com/t-tani/defender2yara/). 
 
